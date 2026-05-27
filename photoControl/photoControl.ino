@@ -19,7 +19,7 @@ void setup() {
 
 void photoControl(){
     if(analogRead(input1)<600){ // when it is dark
-      digitalWrite(pinA, LOW); // turn off the LED
+      digitalWrite(LED, LOW); // turn off the LED
       for (pos = 0; pos <= 180; pos += 1) {
 		    myservo.write(pos);    // tell servo to go to position in variable 'pos'
 		    delay(15);             // waits 15ms for the servo to reach the position
@@ -29,7 +29,7 @@ void photoControl(){
         delay(15);                       // waits 15 ms for the servo to reach the position
       }
     }else{ // when it is bright
-      digitalWrite(pinA, HIGH); // turn on the LED
+      digitalWrite(LED, HIGH); // turn on the LED
     }
     delay(500); // always delay to prevent overly frequent detection than necessary
 }
