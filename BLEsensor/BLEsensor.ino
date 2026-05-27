@@ -73,8 +73,8 @@ void setup() {
   Serial.begin(115200);
   pinMode(input1, INPUT);
 
-  // Create the BLE Device
-  BLEDevice::init("Rev UART Service");
+  // Create the BLE Device, name it to your team
+  BLEDevice::init("Rev UART Service - Stella");
 
   // Create the BLE Server
   pServer = BLEDevice::createServer();
@@ -106,7 +106,7 @@ void loop() {
   if (deviceConnected) {
     Serial.print("Notifying Value: ");
     Serial.println(txValue);
-    String message = "Hello from ESP32! A1 input is "+ String(analogRead(A1));
+    String message = "Hello from ESP32! A1 input is "+ String(analogRead(A1)); // message sent to the phone
     pTxCharacteristic->setValue(message.c_str());
     pTxCharacteristic->notify();
     delay(2000);  // Notifying every 2 seconds
