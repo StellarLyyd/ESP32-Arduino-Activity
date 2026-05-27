@@ -1,23 +1,25 @@
-#include <ESP32Servo.h>
-Servo myservo; 
-#define pinA 9
+#include <ESP32Servo.h> // include the ESP32 servo library. Input Servo.h only for an Arduino
+Servo myservo; // create a new Servo object
 #define input1 A1
-#define motor 5
+#define motor 5 
+#define LED 9
+// define the analog input port, the servo signal port, and the LED port
 
 int pos = 0;
 
 void setup() {
-  pinMode(pinA, OUTPUT);
-  pinMode(input1, INPUT);
+  pinMode(motor, OUTPUT); // declare servo signal port as the output
+  pinMode(LED, OUTPUT); // declare LED as the output
+  pinMode(input1, INPUT); // declare analog input port as the input
   
-  ESP32PWM::allocateTimer(0);
+  ESP32PWM::allocateTimer(0); // set up a pwm timer; not always necessary
 	myservo.setPeriodHertz(50);    // standard 50 hz servo
-	myservo.attach(motor, 1000, 2000);
+	myservo.attach(motor, 1000, 2000); // attach the servo object to the signal port
 }
 
 void photoControl(){
-    if(analogRead(input1)<600){
-      digitalWrite(pinA, LOW);
+    if(analogRead(input1)<600){ // when it is dark
+      digitalWrite(pinA, LOW); // turn off the LED
       for (pos = 0; pos <= 180; pos += 1) {
 		    myservo.write(pos);    // tell servo to go to position in variable 'pos'
 		    delay(15);             // waits 15ms for the servo to reach the position
@@ -26,10 +28,10 @@ void photoControl(){
         myservo.write(pos);              // tell servo to go to position in variable 'pos'
         delay(15);                       // waits 15 ms for the servo to reach the position
       }
-    }else{
-      digitalWrite(pinA, HIGH);
+    }else{ // when it is bright
+      digitalWrite(pinA, HIGH); // turn on the LED
     }
-    delay(500);
+    delay(500); // always delay to prevent overly frequent detection than necessary
 }
 
 void loop() {
