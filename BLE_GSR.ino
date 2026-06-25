@@ -17,9 +17,9 @@ int indexPos = 0;
 
 Adafruit_DRV2605 drv;
 
-#define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"
-#define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
-#define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+#define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9A"
+#define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9A"
+#define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9A"
 
 BLEServer *pServer = nullptr;
 BLECharacteristic *pTxCharacteristic = nullptr;
@@ -67,6 +67,9 @@ void setup() {
   drv.setMode(DRV2605_MODE_INTTRIG);
 
   BLEDevice::init("PaShield");
+
+  Serial.print("BLE MAC: ");
+  Serial.println(BLEDevice::getAddress().toString().c_str());
 
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
@@ -126,6 +129,12 @@ void loop() {
     int diff = abs(moving_avg - gsr_average);
     digitalWrite(D7, LOW);
 
+    String message = "GSR=" + String(gsr_average) +
+                     ", AVG=" + String(moving_avg) +
+                     ", DIFF=" + String(diff);
+
+    Serial.println(message);
+
     if (diff > 100 && gsr_average < 2000 && gsr_average > 1000) {
       Serial.println("Significant change detected. Vibrating.");
 
@@ -134,15 +143,11 @@ void loop() {
       drv.go();
 
       digitalWrite(D7, HIGH);
-
+      
+      message = "Vibrating...";
       delay(500);
     }
 
-    String message = "GSR=" + String(gsr_average) +
-                     ", AVG=" + String(moving_avg) +
-                     ", DIFF=" + String(diff);
-
-    Serial.println(message);
 
     pTxCharacteristic->setValue(message.c_str());
     pTxCharacteristic->notify();
