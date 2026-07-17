@@ -88,6 +88,7 @@ void loop() {
         // End of HTTP request
         if (c == '\n') {
 
+          // ===== TURN LED ON =====
           if (request.indexOf("GET /H") >= 0&& !buttonstate) {
             buttonstate = true;
             analogWrite(IB,0);
@@ -97,6 +98,7 @@ void loop() {
             analogWrite(IA,0);
           }
 
+          // ===== TURN LED OFF =====
           if (request.indexOf("GET /L") >= 0 && buttonstate) {
             buttonstate = false;
             analogWrite(IA,0);
