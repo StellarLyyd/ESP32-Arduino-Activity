@@ -1,13 +1,15 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include "webpage.h"
 
-#define C1 A1
-#define C2 A2
+#define C1 D5
+#define C2 D6
 #define button D10
 #define IA D9
 #define IB D8
 
 bool buttonstate = false;
+volatile long Encodervalue=0;
 
 // ===== WIFI INFO =====
 const char* ssid = "Rev Member";
@@ -23,6 +25,8 @@ void setup() {
   pinMode(button,INPUT);
   pinMode(IA,OUTPUT);
   pinMode(IB,OUTPUT);
+
+  attachInterrupt(digitalPinToInterrupt(C1), updateEncoder, RISING);
   Serial.begin(115200);
 
   Serial.println();
@@ -50,6 +54,16 @@ void setup() {
   Serial.println("Web server started!");
 }
 
+void updateEncoder()
+{
+  if (digitalRead(C1)> digitalRead(C2)){
+    Encodervalue++;
+  }
+  else{
+    Encodervalue--;
+  }
+}
+
 void loop() {
 
   // Check for incoming clients
@@ -74,22 +88,22 @@ void loop() {
         // End of HTTP request
         if (c == '\n') {
 
-          // ===== TURN LED ON =====
           if (request.indexOf("GET /H") >= 0&& !buttonstate) {
             buttonstate = true;
-            analogWrite(IA,200);
-            delay(3200);
-            analogWrite(IA,0);
             analogWrite(IB,0);
+            while(Encodervalue<5000){
+              analogWrite(IA,200);
+            }
+            analogWrite(IA,0);
           }
 
-          // ===== TURN LED OFF =====
           if (request.indexOf("GET /L") >= 0 && buttonstate) {
             buttonstate = false;
-            analogWrite(IB,200);
-            delay(3200);
-            analogWrite(IB,0);
             analogWrite(IA,0);
+            while(Encodervalue>200){
+              analogWrite(IB,200);
+            }
+            analogWrite(IB,0);
           }
 
           // ===== SEND WEBPAGE =====
@@ -97,17 +111,11 @@ void loop() {
           client.println("Content-type:text/html");
           client.println();
 
-          client.println("<html>");
-          client.println("<head><title>QuotaQuom</title></head>");
-          client.println("<body>");
+          client.print(HTML_START);
 
-          client.println("<h1>QuotaQuom</h1>");
+          client.println(Encodervalue);
 
-          client.println("<p><a href=\"/H\"><button>OUT</button></a></p>");
-          client.println("<p><a href=\"/L\"><button>IN</button></a></p>");
-
-          client.println("</body>");
-          client.println("</html>");
+          client.print(HTML_END);
 
           client.println();
 
